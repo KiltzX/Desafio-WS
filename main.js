@@ -4,26 +4,26 @@ const express = require("express");
 const mysql = require("mysql2");
 const app = express();
 
-const connection = mysql.createConnection({
+// Criação de um pool de conexões
+const pool = mysql.createPool({
   host: process.env.host,
   user: process.env.user,
   password: process.env.password,
   database: process.env.database,
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    connection.query("SELECT * FROM cliente", (err, results) => {
-        if(err){
-            console.log(err);
-        }
-      console.log(results);
-    });
-  }
+// Endpoint para buscar clientes
+app.get('/', (req, res) => {
+  pool.query("SELECT * FROM cliente", (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Erro ao consultar o banco de dados.");
+    }
+    res.json(results);
+  });
 });
 
+// Inicia o servidor
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
